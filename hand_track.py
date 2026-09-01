@@ -51,19 +51,25 @@ def main():
                     draw_landmarks(image, lm)
 
                     thumb_tip   = lm[4]
+                    index_tip   = lm[8]
                     index_base  = lm[5]
                     wrist       = lm[0]
                     middle_base = lm[9]
 
                     thumb_dist = math.hypot(thumb_tip.x - index_base.x, thumb_tip.y - index_base.y)
+                    index_dist = math.hypot(index_tip.x - index_base.x, index_tip.y - index_base.y)
                     palm_size  = math.hypot(middle_base.x - wrist.x, middle_base.y - wrist.y)
-                    ratio = max(DIST_MIN, min(DIST_MAX, thumb_dist / palm_size))
-                    angle = int((ratio - DIST_MIN) / (DIST_MAX - DIST_MIN) * 180)
 
-                    ser.write(f"{angle}\n".encode())
+                    ratio = max(DIST_MIN, min(DIST_MAX, thumb_dist / palm_size))
+                    index_ratio = max(DIST_MIN, min(DIST_MAX, index_dist / palm_size))
+
+                    angle = int((ratio - DIST_MIN) / (DIST_MAX - DIST_MIN) * 180)
+                    index_angle = int((index_ratio - DIST_MIN) / (DIST_MAX - DIST_MIN) * 180)
+
+                    ser.write(f"{angle},{index_angle}\n".encode())
 
                     if frame_count % 10 == 0:
-                        print(f"ratio: {ratio:.3f}  angle: {angle}")
+                        print(f"ratio: {ratio:.3f} angle: {angle}  |  index_ratio: {index_ratio:.3f} index_angle: {index_angle}")
 
                 cv2.imshow("Hand tracking", image)
                 if cv2.waitKey(1) & 0xFF == ord("q"):
